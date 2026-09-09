@@ -12,24 +12,13 @@
 name: "CodeQL"
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ master ]
-    paths:
-      - 'modules/**'
-      - 'test/**'
-      - 'test-treeshake/**'
-      - 'rollup*.js'
-      - 'index.html'
-  schedule:
-    - cron: '16 8 * * 3'
+  workflow_dispatch: {}
 
 jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       actions: read
       contents: read
