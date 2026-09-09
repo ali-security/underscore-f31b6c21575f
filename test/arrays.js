@@ -120,6 +120,15 @@
     for (var i = 0; i < 1000; i++) x = [x];
     assert.deepEqual(_.flatten(x), _.range(100000), 'can handle very deep arrays');
     assert.deepEqual(_.flatten(x, true), x[0], 'can handle very deep arrays in shallow mode');
+
+    // Deeply nested arrays must not exhaust the JavaScript call stack, because
+    // an attacker could use that for a denial of service attack.
+    var deep = [1];
+    for (var k = 0; k < 100000; k++) deep = [deep];
+    assert.deepEqual(_.flatten(deep), [1], 'can handle arrays nested 100000 levels deep');
+    var shallowlyFlattened = _.flatten(deep, true);
+    assert.strictEqual(shallowlyFlattened.length, 1, 'can handle arrays nested 100000 levels deep in shallow mode');
+    assert.strictEqual(shallowlyFlattened[0], deep[0][0], 'shallow mode unwraps only the outermost level of a deeply nested array');
   });
 
   QUnit.test('without', function(assert) {

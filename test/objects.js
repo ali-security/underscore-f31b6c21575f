@@ -617,6 +617,31 @@
         assert.notOk(_.isEqual(new DataView(u8.buffer), new DataView(u16one.buffer)), 'Different DataViews with different byte data are not equal');
       }
     }
+
+    // Deeply nested structures must not exhaust the JavaScript call stack,
+    // because an attacker could use that for a denial of service attack.
+    var deepDepth = 8000;
+    var deepObjA = {}, deepObjB = {};
+    var nodeA = deepObjA, nodeB = deepObjB;
+    for (var k = 0; k < deepDepth; k++) {
+      nodeA = nodeA.nested = {};
+      nodeB = nodeB.nested = {};
+    }
+    nodeA.leaf = 1;
+    nodeB.leaf = 1;
+    assert.ok(_.isEqual(deepObjA, deepObjB), 'Deeply nested equivalent objects are equal');
+    nodeB.leaf = 2;
+    assert.notOk(_.isEqual(deepObjA, deepObjB), 'Deeply nested objects that differ at the deepest level are not equal');
+
+    var leafA = [1], leafB = [1];
+    var deepArrA = leafA, deepArrB = leafB;
+    for (k = 0; k < deepDepth; k++) {
+      deepArrA = [deepArrA];
+      deepArrB = [deepArrB];
+    }
+    assert.ok(_.isEqual(deepArrA, deepArrB), 'Deeply nested equivalent arrays are equal');
+    leafB[0] = 2;
+    assert.notOk(_.isEqual(deepArrA, deepArrB), 'Deeply nested arrays that differ at the deepest level are not equal');
   });
 
   QUnit.test('isEmpty', function(assert) {
